@@ -1,0 +1,11 @@
+numpy
+scipy
+pandas
+matplotlib
+jupyter
+librosa
+mir_eval
+mirdata
+torch
+# madmom: install from source, the PyPI release fails on recent NumPy
+# pip install git+https://github.com/CPJKU/madmom
