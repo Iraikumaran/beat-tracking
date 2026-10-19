@@ -1,0 +1,23 @@
+# macOS
+.DS_Store
+
+# Audio and downloaded datasets (too large and copyrighted)
+data/*
+!data/.gitkeep
+!data/splits/
+*.wav
+*.mp3
+*.flac
+*.au
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Model checkpoints
+checkpoints/
+*.pt
+*.pth

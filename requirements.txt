@@ -1,11 +1,12 @@
-numpy
-scipy
-pandas
-matplotlib
+# Python 3.10 or 3.11. Exact versions will be pinned in a lock file with the first committed code.
+numpy>=1.24
+scipy>=1.10
+pandas>=2.0
+matplotlib>=3.7
 jupyter
-librosa
-mir_eval
-mirdata
-torch
-# madmom: install from source, the PyPI release fails on recent NumPy
-# pip install git+https://github.com/CPJKU/madmom
+librosa>=0.10
+mir_eval>=0.7
+mirdata>=0.3.9
+torch>=2.1
+# madmom: the PyPI release fails on recent NumPy, so install from source
+madmom @ git+https://github.com/CPJKU/madmom
