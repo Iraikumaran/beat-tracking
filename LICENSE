@@ -20,6 +20,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-Note: this license covers the code. The Tamil film beat annotations in
-annotations/tamil_film/ will be released under CC BY 4.0. Third-party dataset
+Note: this license covers the code. Any beat annotations we create (for example,
+if the optional extension is approved) will be released under CC BY 4.0. Third-party dataset
 annotations (for example CMR, which is CC BY-NC-ND) are not redistributed here.
