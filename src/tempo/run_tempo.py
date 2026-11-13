@@ -5,7 +5,7 @@ from ..common.evaluate import write_rows
 from . import autocorr as ac
 from .metrics import acc1, acc2, octave_label
 
-METHODS = {"autocorr": ac.tempo_autocorr}
+METHODS = {"autocorr": ac.tempo_autocorr, "autocorr+pulse": ac.tempo_pulse, "autocorr+prior": ac.tempo_prior, "ioi_hist": ac.tempo_ioi}
 
 
 def main():
