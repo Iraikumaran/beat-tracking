@@ -1,0 +1,35 @@
+metric                             AMLt   CMLt      F
+method             condition                         
+dp_tight100        est_tempo      0.852  0.570  0.759
+                   librosa_tempo  0.839  0.643  0.770
+                   oracle_tempo   0.895  0.853  0.843
+librosa_beat_track default        0.811  0.621  0.758 
+
+                                                   mean  median  share_ge_095
+condition                    metric                                          
+same_env_same_tempo          agreement_F          0.888   0.963         0.541
+                             agreement_F_trimmed  0.895   0.969         0.569
+same_env_same_tempo_smoothed agreement_F          0.955   0.979         0.741
+                             agreement_F_trimmed  0.963   0.987         0.786 
+
+method
+dp_tight100           0.356
+librosa_beat_track    0.229
+Name: seconds per minute of audio, dtype: float64 
+
+dp_ellis_tempo Acc1 0.614 Acc2 0.900 double 0.107 half 0.176
+librosa_tempo Acc1 0.697 Acc2 0.883 double 0.090 half 0.097
+
+ method    dp_tight100              librosa_beat_track
+condition   est_tempo oracle_tempo            default
+genre                                                
+blues           0.690        0.777              0.722
+classical       0.505        0.568              0.526
+country         0.830        0.963              0.863
+disco           0.916        0.952              0.900
+hiphop          0.824        0.963              0.870
+jazz            0.576        0.614              0.531
+metal           0.832        0.928              0.801
+pop             0.857        0.889              0.778
+reggae          0.800        0.968              0.846
+rock            0.778        0.841              0.759
