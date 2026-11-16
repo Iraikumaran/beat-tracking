@@ -1,0 +1,27 @@
+% Minimal reproduction of the ISMIR paper layout (A4, two 8.2 cm columns, 10 pt Times).
+% Uses the same author macros as the official ismir.sty, so main.tex also compiles with it.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{ismir}
+\RequirePackage{times}
+\RequirePackage[a4paper,top=2.0cm,bottom=2.5cm,left=1.9cm,right=1.9cm,columnsep=0.8cm]{geometry}
+\RequirePackage{titlesec}
+\RequirePackage[font=small,labelfont=bf]{caption}
+\twocolumn
+\pagestyle{empty}
+\setlength{\parindent}{1em}
+\titleformat{\section}{\normalfont\bfseries\MakeUppercase}{\thesection.}{0.5em}{}
+\titlespacing*{\section}{0pt}{1.2ex}{0.6ex}
+\titleformat{\subsection}{\normalfont\bfseries}{\thesubsection}{0.5em}{}
+\titlespacing*{\subsection}{0pt}{1ex}{0.4ex}
+\titleformat{\subsubsection}{\normalfont\itshape}{\thesubsubsection}{0.5em}{}
+\def\@authorblock{}
+\long\def\threeauthors#1#2#3#4#5#6{\gdef\@authorblock{%
+  \begin{tabular}[t]{c}#1\\[1pt]{\small #2}\end{tabular}\hspace{1.2em}%
+  \begin{tabular}[t]{c}#3\\[1pt]{\small #4}\end{tabular}\hspace{1.2em}%
+  \begin{tabular}[t]{c}#5\\[1pt]{\small #6}\end{tabular}}}
+\long\def\oneauthor#1#2{\gdef\@authorblock{\begin{tabular}[t]{c}#1\\{\small #2}\end{tabular}}}
+\renewcommand{\maketitle}{\twocolumn[{\centering
+  {\fontsize{14}{17}\selectfont\bfseries\MakeUppercase{\@title}\par}\vspace{1.2em}
+  {\@authorblock\par}\vspace{1.6em}}]\thispagestyle{empty}}
+\renewenvironment{abstract}{\centerline{\bfseries ABSTRACT}\vspace{0.3em}\noindent\itshape}{\par\vspace{0.4em}}
+\endinput
