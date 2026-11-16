@@ -1,0 +1,30 @@
+%% method paragraphs, one macro per member, reused by all three reports
+\newcommand{\MethodIrai}{%
+\textbf{Autocorrelation tempo estimation (Irai).} The autocorrelation
+\begin{equation}
+r(\tau) = \sum_n o(n)\,o(n+\tau)
+\end{equation}
+is computed with the FFT, and the plain estimate is $\hat{T} = 60 f_r/\tau^\ast$ for the lag $\tau^\ast$ with the largest $r(\tau)$ between 40 and 250\,BPM. A pulse train stage following \cite{percival} scores the ten strongest autocorrelation peaks by the best phase-aligned match of pulses at $\tau$, $1.5\tau$ and $2\tau$. The octave decision stage weights each of the ten candidates $\hat{T}_k$ by a log-normal prior,
+\begin{equation}
+s_k = r(\tau_k)\, \exp\!\Big(-\tfrac{1}{2}\log_2^2 \frac{\hat{T}_k}{120}\Big),
+\label{eq:prior}
+\end{equation}
+and returns the candidate with the largest $s_k$. An inter-onset-interval (IOI) histogram of picked onsets is a simple baseline. For Objective 2, clips are time-stretched with the ffmpeg \texttt{atempo} filter, which keeps the pitch, so the true tempo becomes $fT$ for a factor $f$. The local estimator applies the octave decision to sliding windows of length $W$ with a hop of 1\,s. Spliced clips join a part stretched by $f_1$ to a part stretched by $f_2$ with a 10\,ms crossfade, at 15\,s of the source for the tracking test and at a random point between 10 and 20\,s for the detection test, in both directions. The change detector folds the local tempo curve into one octave around its median, $u_i = \mathrm{wrap}(\log_2(\hat{T}_i/\mathrm{med}\,\hat{T}))$ with $\mathrm{wrap}$ to $[-\tfrac12, \tfrac12)$, so that octave jumps do not look like changes, and picks the split point that minimises the squared deviation of $u$ from the median of each side.}
+
+\newcommand{\MethodNalluraj}{%
+\textbf{Dynamic programming beat tracking (Nalluraj).} Following Ellis \cite{ellis}, the tempo is estimated from the autocorrelation of $o(n)$ weighted by a log-Gaussian window around 120\,BPM, giving a beat period $p$ in frames. The best score of a beat sequence ending at frame $t$ is
+\begin{equation}
+C(t) = o(t) + \max_{\tau \in [t-2p,\, t-p/2]} \Big( C(\tau) - \alpha \log^2\!\frac{t-\tau}{p} \Big),
+\label{eq:dp}
+\end{equation}
+where the tightness $\alpha$ sets how strongly the tracker keeps an even spacing. The beat sequence is recovered by backtracking from the best frame near the end. The tracker is run with the estimated tempo and with the oracle tempo from the annotations, which separates tempo errors from beat placement errors. For Objective 2, clips are degraded with pink noise at 20 to $-10$\,dB SNR, white noise at 0\,dB, a sixth-order zero-phase Butterworth low pass filter at 4, 2 and 1\,kHz, and MP3 encoding at 128, 64 and 32\,kbps with ffmpeg. The percussive envelope applies the same spectral flux to the percussive part of a median-filter harmonic-percussive separation (17-frame kernels).}
+
+\newcommand{\MethodUsha}{%
+\textbf{Neural network beat tracking (Usha).} Each frame is described by its 40 log-mel values and their positive differences, normalised per clip and stacked over $\pm 4$ frames (720 features). A multilayer perceptron (MLP) with two hidden layers of 128 and 64 units predicts the probability $a(n)$ that frame $n$ lies within one frame of a beat. Negative frames are subsampled to three times the positive frames, and training stops early on a 10\% validation part. Beats are the peaks of the smoothed activation that exceed a local mean by 0.05 and are at least 0.2\,s apart. As a second decoder, $a(n)$ is passed to madmom's DBN beat tracker \cite{madmom, downbeat}, which only uses our activation and no madmom network.
+
+\textbf{Downbeat finder (Usha).} Given beats $b_1, \dots, b_K$ and a bar length $L$ from the annotations, the finder takes the peak of the low-frequency onset envelope $o_{\mathrm{low}}$ (six lowest mel bands, below about 200\,Hz) within 50\,ms of each beat and chooses the bar phase
+\begin{equation}
+\phi^\ast = \arg\max_{\phi \in \{0,\dots,L-1\}} \frac{1}{|\{k : k \equiv \phi\}|}\sum_{k \equiv \phi \,(\mathrm{mod}\, L)} o_{\mathrm{low}}(b_k),
+\label{eq:down}
+\end{equation}
+on the idea that the kick drum and bass mark the downbeat. A baseline takes the first beat as the downbeat.}

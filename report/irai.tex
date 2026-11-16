@@ -1,0 +1,127 @@
+\documentclass{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{ismir}
+\usepackage{amsmath,cite,url}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\input{../figures/macros.tex}
+\input{methods.tex}
+\input{shared_tables.tex}
+\newcommand{\MeIntro}{This report is Irai's individual submission: Section~\ref{sec:me} is his status report, and Section~\ref{sec:team} summarises the rest of the group.}
+
+\title{Tempo Estimation under Tempo Changes: Progress Report}
+
+\threeauthors
+  {Irai Kumaran Sivanesan}{University of Victoria}
+  {Nalluraj Babu}{University of Victoria}
+  {Usha Sundaresan Manivannan}{University of Victoria}
+
+\sloppy
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This is the progress report of Irai Kumaran Sivanesan for the CSC 475/575 group project DP2\_B on tempo estimation and beat tracking. My part is an autocorrelation tempo estimator built from scratch and a study of tempo estimation when the tempo changes. On the artist-filtered GTZAN test split (\NTempo{} clips) the plain estimator reaches Accuracy1 \AccOneAC{}\%, mostly losing to octave errors. A pulse train stage made this worse, while a simple octave decision raised Accuracy1 to \AccOnePrior{}\%, close to librosa (\AccOneLibrosa{}\%) but below madmom (\AccOneMadmom{}\%). Accuracy is stable on clips stretched by 0.8 to 1.2, and a sliding-window estimator with an octave-folded change detector locates a sudden tempo change within 2\,s in \DetFoldTwo{}\% of spliced clips. I also report the status of my teammates and our revised plan.
+\end{abstract}
+
+\input{shared_front.tex}
+
+\section{Methods}
+
+\MethodIrai
+
+\begin{table}[t]
+\centering\small\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Method & Acc1 & Acc2 & Half & Dbl. & ms \\
+\midrule
+\csname @@input\endcsname ../figures/tab_tempo.tex
+\bottomrule
+\end{tabular}
+\caption{Tempo estimation on the GTZAN test split (\%, \NTempo{} clips). Half and Dbl.\ give the share of clips estimated at half or double the reference tempo; ms is the mean run time per clip on one laptop, for our methods without the shared onset envelope.}
+\label{tab:tempo}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{../figures/fig_tempo_genre.pdf}
+\caption{Accuracy1 per genre for the plain estimator, the estimator with octave decision, and madmom.}
+\label{fig:tgenre}
+\end{figure}
+
+\section{Individual Status Report: Irai Kumaran Sivanesan}
+\label{sec:me}
+
+\textbf{Objective 1: autocorrelation tempo estimator.}
+\emph{PI1 (basic, done).} The estimator runs on all \NTempo{} test clips in about a millisecond per clip once the onset envelope is computed.
+\emph{PI2 (basic, partly done).} Accuracy1, Accuracy2 and an octave error label are reported on GTZAN (Table~\ref{tab:tempo}). The plain estimator reaches Acc1 \AccOneAC{}\% but Acc2 \AccTwoAC{}\%, so most of its errors are octave errors; \HalfAC{}\% of the clips are estimated at half the tempo. GiantSteps is still missing because its audio is downloaded from an online store's preview server with the dataset script, which was blocked in our first setup.
+\emph{PI3 (expected, done with a negative result).} The pulse train stage lowered Acc1 to \AccOnePulse{}\%. Our scoring favours slow periods, because a pulse train at $2\tau$ also lines up with every second beat. Three variants (phase contrast, subdivision energy and normalised pulse trains) did not beat the plain estimator.
+\emph{PI4 (expected, done).} On the same clips and machine, the IOI baseline reaches \AccOneIOI{}\%, librosa \AccOneLibrosa{}\% and madmom \AccOneMadmom{}\% (Acc2 \AccTwoMadmom{}\%). madmom's neural network is clearly the most accurate, but takes about \MadmomMs{}\,s per clip against \LibrosaMs{}\,ms for librosa. Per genre (Figure~\ref{fig:tgenre}), classical (35\%) and jazz (56\%) are the hardest for every estimator. madmom is ahead by about 20 points for country, hip-hop, blues and jazz, while for disco our estimator is almost as good (93\% against 97\%).
+\emph{PI5 (advanced, done).} The octave decision of Eq.~(\ref{eq:prior}) raises Acc1 to \AccOnePrior{}\% with Acc2 \AccTwoPrior{}\%, so it fixes most octave errors without hurting the rest. It helps most where the plain estimator picks half the tempo, such as hip-hop (19\% to 78\%) and disco (41\% to 93\%).
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{../figures/fig_tempo_change.pdf}
+\caption{Left: accuracy of the estimator with octave decision on time-stretched clips (\NChange{} clips). Right: median relative error of the local estimator for different window lengths.}
+\label{fig:tchange}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{../figures/fig_splice.pdf}
+\caption{Local tempo of a clip spliced from parts stretched by 0.85 and 1.15, for three window lengths, with the true tempo and the detected change point.}
+\label{fig:splice}
+\end{figure}
+
+\textbf{Objective 2: tempo estimation under tempo changes.}
+\emph{PI1 (basic, done).} \NChange{} test clips were stretched by 0.8, 0.9, 1.0, 1.1 and 1.2. The factor 1.0 also goes through ffmpeg and checks that the processing itself does not change the result.
+\emph{PI2 (basic, done).} All estimators were run on the stretched clips. Acc1 of the octave decision stays between \AccOneStretchMin{}\% and \AccOneStretchMax{}\% across factors (Figure~\ref{fig:tchange}), so a global change of tempo does not cause new octave errors, as long as the prior centre stays inside the octave of the music.
+\emph{PI3 (expected, done).} The local estimator gives a median relative error of \RelErrTwelve{}\% with 12\,s windows and \RelErrFour{}\% with 4\,s windows on the stretched clips. Longer windows average more beats but react later to a change.
+\emph{PI4 (expected, done).} On clips that jump from 0.85 to 1.15 times the original tempo at 15\,s, the 6\,s estimator has a median absolute error of \SpliceMAE{}\,BPM over the clip, and this error comes mostly from frames that jump an octave (Figure~\ref{fig:splice}). It settles within 4\% of the new tempo in \SettleFrac{}\% of the clips, with a median delay of \SettleMed{}\,s after the change. The delay is short because the window is centred on its time stamp and the new part quickly dominates it.
+\emph{PI5 (advanced, done).} On \NChange{} clips spliced at a random time in both directions, the octave-folded detector finds the change with a median error of \DetFoldMed{}\,s and within 2\,s in \DetFoldTwo{}\% of the cases. Without folding, the octave jumps of the local estimate are taken as changes, and the error rises to \DetRawMed{}\,s (\DetRawTwo{}\% within 2\,s).
+
+\textbf{What I learned and what did not work.} Octave errors are the main problem of tempo estimation, and a prior over typical tempi fixes more of them than a more complex pulse model. Our pulse trains need the normalisation and the extra features of the original paper \cite{percival}. For local tempo, octave jumps between windows are a larger error than the window length, and they also confuse change detection unless the curve is folded into one octave. The spliced clips are a controlled test only; real tempo changes are gradual, which our detector does not model yet.
+
+\section{Team Status}
+\label{sec:team}
+
+\textbf{Nalluraj Babu} built the dynamic programming beat tracker of Ellis \cite{ellis} and tests it on degraded audio. The tracker reaches F = \DPF{} with the estimated tempo and \DPOracleF{} with the oracle tempo, against \LibF{} for librosa and \MadF{} for madmom (Table~\ref{tab:beats}). Given the same onset envelope and tempo, his tracker agrees with librosa's implementation at a median F of \AgreeRawMed{}, and \AgreeMed{} after adding librosa's envelope smoothing. Under degradation, the tracker is robust to MP3 and to moderate noise but loses accuracy with a 1\,kHz low pass filter (\DegLPOne{}) and with pink noise at $-10$\,dB (\DegNoiseMinusTen{}). The 1D State Space comparison and the advanced goals remain.
+
+\textbf{Usha Sundaresan Manivannan} built a frame-wise neural network (an MLP on stacked log-mel features) and a downbeat finder that picks the bar position with the strongest bass and kick onsets. The MLP reaches F = \NNF{} with peak picking and \NNDBNF{} with madmom's DBN decoder on its own activation, which shows that the missing temporal model, not the frame classifier, causes most of its errors. For downbeats, the low-frequency finder reaches \DBOracle{} on annotated beats against \DBMadBar{} for madmom's bar tracker on the same beats and \DBMadJoint{} for madmom's joint model from audio. The TCN in PyTorch and the advanced goals remain.
+
+\begin{table}[t]
+\centering\small\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Beat tracker & F & CMLt & AMLt \\
+\midrule
+\csname @@input\endcsname ../figures/tab_beats.tex
+\bottomrule
+\end{tabular}
+\caption{Beat tracking on the GTZAN test split (\NBeat{} clips).}
+\label{tab:beats}
+\end{table}
+
+\PITable
+\TimelineTable
+
+\section{Revised Plan and Goals}
+
+Our original plan assumed librosa, madmom and PyTorch from the start. Our first setup only had NumPy, SciPy and scikit-learn, so we built everything ourselves and moved the library comparisons later; these are now done for all three methods. Table~\ref{tab:pi} gives the status of every PI and Table~\ref{tab:time} the revised timeline.
+
+\textbf{My goals for the final report.}
+\emph{Basic:} add GiantSteps Tempo to PI2 and report all tempo results on both datasets.
+\emph{Expected:} fix the pulse train stage with the normalisation of \cite{percival} and check whether it helps on top of the octave decision; run librosa and madmom on the stretched and spliced clips.
+\emph{Advanced:} test the change detector on gradual tempo changes (a linear ramp of the stretch factor) and on GTZAN clips with real tempo drift, and compare with the predominant local pulse of \cite{plp}.
+
+\textbf{Team goals.} Basic: every method and study complete on GTZAN. Expected: the TCN, the 1D State Space tracker in all comparisons, and GiantSteps. Advanced: tempo following and automatic tightness for the DP tracker, and a TCN with a downbeat output.
+
+\section{Conclusion}
+
+The tempo estimator works, and its main weakness, the octave error, is largely fixed by a simple prior. The tempo change study shows that a global change of speed is not a problem, but sudden changes produce octave jumps in short windows, which folding the tempo curve handles well enough to locate the change. The next steps are GiantSteps, a working pulse train stage and gradual tempo changes.
+
+\input{refs.tex}
+
+\end{document}

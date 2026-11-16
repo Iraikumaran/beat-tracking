@@ -12,6 +12,73 @@ This is Default Project 2. The goal is to estimate the tempo of a song (in BPM) 
 
 Each of us will build one method from scratch: an autocorrelation tempo estimator, a dynamic programming beat tracker, and a small neural network beat tracker. We will compare them with existing tools (librosa, madmom and the 1D State Space tracker) on GTZAN and GiantSteps. Beyond the basic comparison, each of us will look at one known weak spot of beat tracking: songs that change tempo, noisy or low quality audio, and finding the first beat of each bar (the downbeat).
 
+## Progress (Nov 16, 2026)
+
+The progress reports are in `report/` (`irai.pdf`, `nalluraj.pdf`, `usha.pdf`). All results are on the artist-filtered GTZAN test split (290 clips). Every experiment was run twice and gave the same numbers.
+
+| Method | Result |
+|---|---|
+| Autocorrelation tempo, plain / with octave decision | Acc1 39.3% / 66.6% (librosa 70.7%, madmom 81.4%) |
+| Tempo change detection on spliced clips | within 2 s in 75% of clips |
+| DP beat tracker, estimated / true tempo | F 0.76 / 0.84 (librosa 0.76, madmom 0.88) |
+| DP tracker at 1 kHz low pass / -10 dB pink noise | F 0.75 / 0.60 (clean 0.79) |
+| MLP beat tracker, peak picking / madmom DBN | F 0.64 / 0.83 |
+| Downbeat finder on true beats | F 0.34 (first beat 0.26, madmom bar tracker 0.76) |
+
+PI status (D done, P partly done, - not started):
+
+| Member | Obj. | PI1 | PI2 | PI3 | PI4 | PI5 |
+|---|---|---|---|---|---|---|
+| Irai | 1 | D | P | D (negative result) | D | D |
+| Irai | 2 | D | D | D | D | D |
+| Nalluraj | 1 | D | D | D | D | - |
+| Nalluraj | 2 | D | D | P | D | - |
+| Usha | 1 | D | P | D | P | - |
+| Usha | 2 | D | D | D | D | - |
+
+Still to do: GiantSteps, the 1D State Space tracker, the TCN in PyTorch, and the remaining advanced goals.
+
+## Repository
+
+| Folder | What is in it |
+|---|---|
+| `src/common/` | data loading, onset envelope, mir_eval scoring (shared) |
+| `src/tempo/`, `src/tempo_change/` | Irai: tempo estimator, tempo change study |
+| `src/dp_tracker/`, `src/degradation/` | Nalluraj: DP beat tracker, degraded audio study |
+| `src/tcn/`, `src/downbeat/` | Usha: neural network beat tracker, downbeat finder |
+| `results/` | result CSVs (track, dataset, genre, method, condition, metric, value) |
+| `scripts/make_figures.py` | makes every figure and table in `figures/` from `results/` |
+| `report/` | LaTeX source and PDFs of the progress reports |
+
+## How to run
+
+```
+pip install -r requirements.txt
+pip install git+https://github.com/CPJKU/madmom
+bash scripts/get_data.sh
+```
+
+Put the GTZAN audio in `data/genres_original/` (Kaggle copy). Then, from the repository root:
+
+```
+python -m src.tempo.run_tempo
+python -m src.tempo.run_compare
+N_TRACKS=58 python -m src.tempo_change.run_tempo_change
+N_TRACKS=58 python -m src.tempo_change.run_detect
+python -m src.dp_tracker.run_dp
+python -m src.dp_tracker.run_validate
+N_TRACKS=58 python -m src.degradation.run_degradation
+N_TRACKS=58 python -m src.degradation.run_robust
+N_TRACKS=58 python -m src.degradation.run_madmom_degradation
+python -m src.tcn.run_nn
+python -m src.tcn.run_madmom
+python -m src.downbeat.run_downbeat
+python -m src.downbeat.run_madmom_downbeat
+python scripts/make_figures.py
+```
+
+`run_nn` must run before `run_madmom` and `run_downbeat`. Set `RESULTS_DIR=results_test` to write somewhere other than `results/`. To rebuild a report: `cd report && pdflatex irai.tex` (twice).
+
 ## Datasets
 
 - **GTZAN**: 1000 clips of 30 seconds in 10 genres. We use the beat, downbeat and tempo annotations from the gtzan_tempo_beat repository [1], and the artist-filtered split of Kereliuk et al. [2] to avoid the known problems with GTZAN [3].
@@ -37,7 +104,7 @@ For tempo we use Accuracy1 and Accuracy2 [8]. For beats and downbeats we use F-m
 | 6 | Nov 24 to 30 | Finish experiments, advanced goals if time allows |
 | 7 | Dec 1 to 7 | Write the report and prepare the presentation |
 
-We will adjust these weeks once the progress report and final deadlines are confirmed.
+Weeks 1 to 4 are done. The revised plan for weeks 5 and 6 is in the progress reports.
 
 ## Related Work
 

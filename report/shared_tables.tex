@@ -1,0 +1,36 @@
+\newcommand{\PITable}{%
+\begin{table}[t]
+\centering\small\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}llccccc@{}}
+\toprule
+Member & Obj. & PI1 & PI2 & PI3 & PI4 & PI5 \\
+\midrule
+Irai & 1 & D & P & D$^\ast$ & D & D \\
+Irai & 2 & D & D & D & D & D \\
+Nalluraj & 1 & D & D & D & D & -- \\
+Nalluraj & 2 & D & D & P & D & -- \\
+Usha & 1 & D & P & D & P & -- \\
+Usha & 2 & D & D & D & D & -- \\
+\bottomrule
+\end{tabular}
+\caption{Status of all performance indicators. D: done, P: partly done, --: not started. PI1 and PI2 are basic, PI3 and PI4 expected, PI5 advanced. $^\ast$Done, with a negative result.}
+\label{tab:pi}
+\end{table}}
+
+\newcommand{\TimelineTable}{%
+\begin{table}[t]
+\centering\small\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lp{0.80\columnwidth}@{}}
+\toprule
+Week & Plan (status) \\
+\midrule
+1--2 & Spec, repository, data, shared front end, basic methods (done) \\
+3--4 & Evaluation on GTZAN, librosa and madmom comparisons (done) \\
+5 & TCN in PyTorch (Usha); 1D State Space tracker under the same tests (Nalluraj, Usha); GiantSteps tempo (Irai) \\
+6 & Advanced goals: tempo following and automatic tightness (Nalluraj), TCN with downbeat output and stretch augmentation (Usha), pulse train fix and change detection on real tempo changes (Irai) \\
+7 & Final report and presentation (Dec 1--7) \\
+\bottomrule
+\end{tabular}
+\caption{Revised timeline. Weeks 5 and 6 are Nov 17--23 and Nov 24--30.}
+\label{tab:time}
+\end{table}}
