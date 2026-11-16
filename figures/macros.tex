@@ -14,18 +14,55 @@
 \newcommand{\HalfAC}{34.5}
 \newcommand{\MadmomMs}{2.1}
 \newcommand{\LibrosaMs}{46}
+\newcommand{\StretchOursMin}{67}
+\newcommand{\StretchOursMax}{74}
+\newcommand{\StretchOursSlowDiff}{+2}
+\newcommand{\StretchOursSlowCI}{[-12, 16]}
+\newcommand{\StretchOursFastDiff}{-3}
+\newcommand{\StretchOursFastCI}{[-12, 5]}
+\newcommand{\StretchLibrosaMin}{60}
+\newcommand{\StretchLibrosaMax}{74}
+\newcommand{\StretchLibrosaSlowDiff}{-14}
+\newcommand{\StretchLibrosaSlowCI}{[-28, 0]}
+\newcommand{\StretchLibrosaFastDiff}{-14}
+\newcommand{\StretchLibrosaFastCI}{[-26, -2]}
+\newcommand{\StretchMadmomMin}{81}
+\newcommand{\StretchMadmomMax}{91}
+\newcommand{\StretchMadmomSlowDiff}{+3}
+\newcommand{\StretchMadmomSlowCI}{[-5, 12]}
+\newcommand{\StretchMadmomFastDiff}{-7}
+\newcommand{\StretchMadmomFastCI}{[-16, 2]}
 \newcommand{\AccOneStretchMin}{67.2}
 \newcommand{\AccOneStretchMax}{74.1}
+\newcommand{\RelErrMeanFour}{20}
+\newcommand{\RelErrPNinetyFour}{52}
+\newcommand{\RelErrBadFour}{34}
+\newcommand{\RelErrMeanSix}{20}
+\newcommand{\RelErrPNinetySix}{51}
+\newcommand{\RelErrBadSix}{32}
+\newcommand{\RelErrMeanEight}{20}
+\newcommand{\RelErrPNinetyEight}{51}
+\newcommand{\RelErrBadEight}{31}
+\newcommand{\RelErrMeanTwelve}{21}
+\newcommand{\RelErrPNinetyTwelve}{51}
+\newcommand{\RelErrBadTwelve}{31}
 \newcommand{\RelErrFour}{1.7}
 \newcommand{\RelErrTwelve}{1.1}
 \newcommand{\SpliceMAE}{18.7}
 \newcommand{\SettleMed}{0.3}
 \newcommand{\SettleFrac}{62}
+\newcommand{\SettleMean}{2.5}
+\newcommand{\SettleNever}{22}
+\newcommand{\SpliceMAEMean}{26.2}
 \newcommand{\NChange}{58}
 \newcommand{\DetFoldMed}{1.2}
 \newcommand{\DetFoldTwo}{75}
+\newcommand{\DetFoldMean}{1.7}
+\newcommand{\DetFoldPNinety}{3.4}
 \newcommand{\DetRawMed}{2.2}
 \newcommand{\DetRawTwo}{46}
+\newcommand{\DetRawMean}{4.1}
+\newcommand{\DetRawPNinety}{10.8}
 \newcommand{\BestTight}{300}
 \newcommand{\DPF}{0.76}
 \newcommand{\DPCML}{0.57}
@@ -46,6 +83,7 @@
 \newcommand{\NNDBNCML}{0.71}
 \newcommand{\NNDBNAML}{0.88}
 \newcommand{\NBeat}{290}
+\newcommand{\NNFullSentence}{Training on all 639 readable training and validation clips gives F = 0.67 with peak picking, against 0.64 with 160 clips, so more data helps only a little.}
 \newcommand{\AgreeMed}{0.98}
 \newcommand{\AgreeShare}{74}
 \newcommand{\AgreeRawMed}{0.96}
@@ -54,6 +92,26 @@
 \newcommand{\NNDBNTime}{0.51}
 \newcommand{\MLPTime}{0.39}
 \newcommand{\DPTime}{0.35}
+\newcommand{\DiffNTwenty}{+0.03}
+\newcommand{\DiffCINTwenty}{[0.01, 0.06]}
+\newcommand{\DiffNZero}{0.00}
+\newcommand{\DiffCINZero}{[-0.05, 0.05]}
+\newcommand{\DiffNMinusTen}{-0.19}
+\newcommand{\DiffCINMinusTen}{[-0.26, -0.13]}
+\newcommand{\DiffLPOne}{-0.04}
+\newcommand{\DiffCILPOne}{[-0.09, 0.01]}
+\newcommand{\DiffMPThree}{0.00}
+\newcommand{\DiffCIMPThree}{[-0.02, 0.01]}
+\newcommand{\MadDiffNMinusTen}{-0.22}
+\newcommand{\MadDiffCINMinusTen}{[-0.29, -0.15]}
+\newcommand{\MadDiffLPOne}{-0.05}
+\newcommand{\MadDiffCILPOne}{[-0.08, -0.02]}
+\newcommand{\PercDiffClean}{+0.01}
+\newcommand{\PercDiffCIClean}{[-0.02, 0.03]}
+\newcommand{\PercDiffNMinusTen}{-0.07}
+\newcommand{\PercDiffCINMinusTen}{[-0.13, -0.03]}
+\newcommand{\PercDiffLPOne}{-0.03}
+\newcommand{\PercDiffCILPOne}{[-0.07, 0.01]}
 \newcommand{\DegClean}{0.79}
 \newcommand{\DegOrClean}{0.89}
 \newcommand{\PercClean}{0.80}
@@ -88,5 +146,10 @@
 \newcommand{\DBFirst}{0.26}
 \newcommand{\DBNN}{0.17}
 \newcommand{\DBNNFirst}{0.17}
+\newcommand{\DBAuto}{0.33}
+\newcommand{\DBAutoNN}{0.18}
+\newcommand{\DBAutoLen}{89}
+\newcommand{\DBAutoLenNN}{71}
+\newcommand{\DBZeroShare}{64}
 \newcommand{\DBMadJoint}{0.65}
 \newcommand{\DBMadBar}{0.76}

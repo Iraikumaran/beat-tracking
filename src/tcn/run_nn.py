@@ -12,7 +12,11 @@ PER_GENRE = int(os.environ.get("TRAIN_PER_GENRE", 16))
 def training_set(tracks, rng):
     X, Y = [], []
     for t in tracks:
-        f = frame_features(data.load_audio(data.audio_path(t)))
+        try:
+            f = frame_features(data.load_audio(data.audio_path(t)))
+        except ValueError:
+            print("skipped unreadable", t)
+            continue
         y = frame_labels(data.load_beats(t)[0], len(f))
         pos, neg = np.flatnonzero(y), np.flatnonzero(y == 0)
         neg = rng.choice(neg, min(len(neg), NEG_RATIO * len(pos)), replace=False)

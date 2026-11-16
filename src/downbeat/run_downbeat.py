@@ -4,7 +4,7 @@ import mir_eval
 from ..common import data
 from ..common.features import low_onset
 from ..common.evaluate import write_rows
-from .finder import find_downbeats
+from .finder import find_downbeats, find_downbeats_auto
 
 
 def main():
@@ -24,9 +24,11 @@ def main():
         for cond, b in inputs.items():
             if len(b) < length:
                 continue
-            for method, est in (("low_onset_finder", find_downbeats(b, env, length)), ("first_beat", b[::length])):
+            auto, est_len = find_downbeats_auto(b, env)
+            for method, est in (("low_onset_finder", find_downbeats(b, env, length)), ("first_beat", b[::length]), ("low_onset_finder_auto", auto)):
                 f = mir_eval.beat.f_measure(ref_db, est)
                 rows.append(dict(track=t, dataset="gtzan", genre=data.genre(t), method=method, condition=cond, metric="F", value=f))
+            rows.append(dict(track=t, dataset="gtzan", genre=data.genre(t), method="low_onset_finder_auto", condition=cond, metric="bar_length_correct", value=int(est_len == length)))
     print(write_rows("downbeat_gtzan.csv", rows))
 
 

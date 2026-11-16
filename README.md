@@ -2,7 +2,7 @@
 
 CSC 475/575, University of Victoria, Fall 2026
 
-Irai Kumaran Sivanesan, Nalluraj Babu, Manivannan Usha Sundaresan
+Irai Kumaran Sivanesan, Nalluraj Babu, Manivannan Usha Sundaresan (Mani)
 
 Repository: https://github.com/Iraikumaran/beat-tracking
 
@@ -29,7 +29,7 @@ PI status (D done, P partly done, - not started):
 
 | Member | Obj. | PI1 | PI2 | PI3 | PI4 | PI5 |
 |---|---|---|---|---|---|---|
-| Irai | 1 | D | P | D (negative result) | D | D |
+| Irai | 1 | D | P | P (partial replication, negative result) | D | D |
 | Irai | 2 | D | D | D | D | D |
 | Nalluraj | 1 | D | D | D | D | - |
 | Nalluraj | 2 | D | D | P | D | - |

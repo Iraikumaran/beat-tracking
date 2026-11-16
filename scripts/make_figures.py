@@ -29,6 +29,17 @@ def num(d, metric):
     return d
 
 
+def boot(v, n=2000, seed=0):
+    v = np.asarray(v, float)
+    m = np.random.default_rng(seed).choice(v, (n, len(v))).mean(1)
+    return np.percentile(m, 2.5), np.percentile(m, 97.5)
+
+
+def ci(v, fmt="{:.2f}"):
+    lo, hi = boot(v)
+    return f"[{fmt.format(lo)}, {fmt.format(hi)}]"
+
+
 def save(fig, name):
     fig.tight_layout()
     fig.savefig(os.path.join(F, name))
@@ -84,9 +95,20 @@ def tempo_change():
     fac = sorted(a.condition.unique(), key=lambda c: float(c.split("_")[1]))
     x = [float(c.split("_")[1]) for c in fac]
     fig, ax = plt.subplots(1, 2, figsize=(3.4, 1.5))
-    ax[0].plot(x, [a[a.condition == c].value.mean() * 100 for c in fac], "o-", label="Acc1", color="k")
-    ax[0].plot(x, [a2[a2.condition == c].value.mean() * 100 for c in fac], "s--", label="Acc2", color="0.5")
-    ax[0].set_xlabel("stretch factor"); ax[0].set_ylabel("acc. (%)"); ax[0].set_ylim(0, 100); ax[0].legend(frameon=False, fontsize=6)
+    extra = [load(n) for n in ("tempo_change_librosa.csv", "tempo_change_madmom.csv") if has(n)]
+    allm = pd.concat([d] + extra)
+    for m, lab, st in (("autocorr+prior", "ours", "o-"), ("librosa", "librosa", "s--"), ("madmom", "madmom", "^:")):
+        am = num(allm[allm.method == m], "acc1")
+        if len(am):
+            mean = [am[am.condition == c].value.mean() * 100 for c in fac]
+            err = np.array([boot(am[am.condition == c].value * 100) for c in fac]).T
+            ax[0].errorbar(x, mean, yerr=[np.array(mean) - err[0], err[1] - np.array(mean)], fmt=st, color="k" if m == "autocorr+prior" else "0.5", ms=3, lw=0.8, capsize=1.5, label=lab)
+            macros[f"Stretch{lab.capitalize()}Min"] = f"{min(mean):.0f}"; macros[f"Stretch{lab.capitalize()}Max"] = f"{max(mean):.0f}"
+            pv = am.pivot_table(index="track", columns="condition", values="value")
+            for fc, kk in (("stretch_0.8", "Slow"), ("stretch_1.2", "Fast")):
+                diff = (pv[fc] - pv["stretch_1.0"]) * 100
+                macros[f"Stretch{lab.capitalize()}{kk}Diff"] = f"{diff.mean():+.0f}"; macros[f"Stretch{lab.capitalize()}{kk}CI"] = ci(diff, "{:.0f}")
+    ax[0].set_xlabel("stretch factor"); ax[0].set_ylabel("Acc1 (%)"); ax[0].set_ylim(0, 105); ax[0].legend(frameon=False, fontsize=5.5, loc="lower center")
     loc = num(d[d.method.str.startswith("local_")], "rel_err")
     wins = sorted(loc.method.unique(), key=lambda m: int(m.split("_")[1][:-1]))
     med = {w: loc[loc.method == w].value.median() * 100 for w in wins}
@@ -95,6 +117,11 @@ def tempo_change():
     save(fig, "fig_tempo_change.pdf")
     macros["AccOneStretchMin"] = f"{min(a[a.condition == c].value.mean() * 100 for c in fac):.1f}"
     macros["AccOneStretchMax"] = f"{max(a[a.condition == c].value.mean() * 100 for c in fac):.1f}"
+    for w in wins:
+        v = loc[loc.method == w].value * 100
+        k = {"local_4s": "Four", "local_6s": "Six", "local_8s": "Eight", "local_12s": "Twelve"}[w]
+        macros[f"RelErrMean{k}"] = f"{v.mean():.0f}"; macros[f"RelErrPNinety{k}"] = f"{np.percentile(v, 90):.0f}"
+        macros[f"RelErrBad{k}"] = f"{100*(v > 4).mean():.0f}"
     macros["RelErrFour"] = f"{med.get('local_4s', np.nan):.1f}"
     macros["RelErrTwelve"] = f"{med.get('local_12s', np.nan):.1f}"
     sp = d[d.condition.str.startswith("splice")]
@@ -102,6 +129,8 @@ def tempo_change():
     st = num(sp, "settle_s").value
     macros["SettleMed"] = f"{st.median():.1f}"
     macros["SettleFrac"] = f"{100*st.notna().mean():.0f}"
+    macros["SettleMean"] = f"{st.mean():.1f}"; macros["SettleNever"] = int(st.isna().sum())
+    macros["SpliceMAEMean"] = f"{num(sp, 'mae_bpm').value.mean():.1f}"
     macros["NChange"] = d.track.nunique()
     if has("tempo_change_detect.csv"):
         e = num(load("tempo_change_detect.csv"), "abs_err_s")
@@ -109,6 +138,7 @@ def tempo_change():
             v = e[e.method == m].value
             macros[f"Det{key}Med"] = f"{v.median():.1f}"
             macros[f"Det{key}Two"] = f"{100*(v <= 2).mean():.0f}"
+            macros[f"Det{key}Mean"] = f"{v.mean():.1f}"; macros[f"Det{key}PNinety"] = f"{np.percentile(v, 90):.1f}"
 
 
 def splice_example():
@@ -172,6 +202,10 @@ def beats():
     for lab, (_, _, vals) in gen.items():
         macros[f"{key[lab]}F"], macros[f"{key[lab]}CML"], macros[f"{key[lab]}AML"] = (f"{x:.2f}" for x in vals)
     macros["NBeat"] = nn.track.nunique()
+    macros["NNFullSentence"] = ""
+    if has("nn_gtzan_full.csv"):
+        full = num(load("nn_gtzan_full.csv"), "F").value.mean()
+        macros["NNFullSentence"] = f"Training on all 639 readable training and validation clips gives F = {full:.2f} with peak picking, against {num(nn, "F").value.mean():.2f} with 160 clips, so more data helps only a little."
     plot = [(lab, g, c) for lab, (g, c, _) in gen.items() if c is not None]
     fig, ax = plt.subplots(figsize=(3.4, 1.6))
     i = np.arange(len(GENRES)); w = 0.8 / len(plot)
@@ -224,11 +258,31 @@ def degradation():
     ax.set_xticks(i); ax.set_xticklabels(labels, rotation=60, fontsize=6)
     ax.set_ylabel("F-measure"); ax.set_ylim(0, 1.3); ax.set_yticks([0, 0.5, 1])
     ax.legend(frameon=False, fontsize=6, ncol=3, loc="upper center")
-    save(fig, "fig_degradation.pdf")
+    fig.tight_layout()
     rows = []
     for c, lab in zip(order, labels):
         rows.append(f"{lab} & " + " & ".join(f"{means[s].get(c, np.nan):.2f}" for s, _, _ in sets) + " \\\\")
     table("tab_degradation.tex", rows)
+    for k, (lab, fr, c) in enumerate(sets):
+        g = fr.pivot_table(index="track", columns="condition", values="value")
+        lo_hi = np.array([boot(g[x]) for x in order]).T
+        ax.errorbar(i + (k - (len(sets) - 1) / 2) * w, g[order].mean().values, yerr=[g[order].mean().values - lo_hi[0], lo_hi[1] - g[order].mean().values], fmt="none", ecolor="k", elinewidth=0.5, capsize=1)
+    fig.savefig(os.path.join(F, "fig_degradation.pdf"))
+    plt.close(fig)
+    dp = sets[0][1].pivot_table(index="track", columns="condition", values="value")
+    for c, k in (("noise_20dB", "NTwenty"), ("noise_0dB", "NZero"), ("noise_-10dB", "NMinusTen"), ("lowpass_1k", "LPOne"), ("mp3_32k", "MPThree")):
+        diff = dp[c] - dp["clean"]
+        macros[f"Diff{k}"] = f"{diff.mean():+.2f}".replace("-0.00", "0.00").replace("+0.00", "0.00"); macros[f"DiffCI{k}"] = ci(diff)
+    if "madmom" in means:
+        mm = num(load("degradation_madmom.csv"), "F").pivot_table(index="track", columns="condition", values="value")
+        for c, k in (("noise_-10dB", "NMinusTen"), ("lowpass_1k", "LPOne")):
+            diff = mm[c] - mm["clean"]
+            macros[f"MadDiff{k}"] = f"{diff.mean():+.2f}"; macros[f"MadDiffCI{k}"] = ci(diff)
+    if "DP (percussive)" in means:
+        pp = sets[1][1].pivot_table(index="track", columns="condition", values="value")
+        for c, k in (("clean", "Clean"), ("noise_-10dB", "NMinusTen"), ("lowpass_1k", "LPOne")):
+            diff = pp[c] - dp[c]
+            macros[f"PercDiff{k}"] = f"{diff.mean():+.2f}"; macros[f"PercDiffCI{k}"] = ci(diff)
     e = means["DP (spectral flux)"]
     o = d[d.method == "dp_oracle_tempo"].groupby("condition").value.mean()
     for c, k in (("clean", "Clean"), ("noise_0dB", "NoiseZero"), ("noise_-10dB", "NoiseMinusTen"), ("white_0dB", "White"),
@@ -248,18 +302,25 @@ def downbeat():
     cell = lambda fr: f"{fr.value.mean():.3f}" if len(fr) else "--"
     rows = []
     a = d[d.condition == "annotated_beats"]
-    rows.append("annotated beats & " + cell(a[a.method == "first_beat"]) + " & " + cell(a[a.method == "low_onset_finder"]) + " & " +
-                (cell(m[m.method == "madmom_bar"]) if m is not None else "--") + " \\\\")
     b = d[d.condition == "nn_beats"]
-    rows.append("MLP beats & " + cell(b[b.method == "first_beat"]) + " & " + cell(b[b.method == "low_onset_finder"]) + " & -- \\\\")
+    for lab, fr, mad in (("annotated beats", a, m[m.method == "madmom_bar"] if m is not None else []), ("MLP beats", b, [])):
+        rows.append(f"{lab} & " + " & ".join(cell(fr[fr.method == k]) for k in ("first_beat", "low_onset_finder", "low_onset_finder_auto")) + " & " + (cell(mad) if len(mad) else "--") + " \\\\")
     if m is not None:
-        rows.append("audio (joint model) & -- & -- & " + cell(m[m.method == "madmom_joint"]) + " \\\\")
+        rows.append("audio (joint) & -- & -- & -- & " + cell(m[m.method == "madmom_joint"]) + " \\\\")
     table("tab_downbeat.tex", rows)
     s = a[a.method == "low_onset_finder"]
     macros["DBOracle"] = f"{s.value.mean():.2f}"; macros["NDown"] = s.track.nunique()
     macros["DBFirst"] = f"{a[a.method == 'first_beat'].value.mean():.2f}"
     macros["DBNN"] = f"{b[b.method == 'low_onset_finder'].value.mean():.2f}"
     macros["DBNNFirst"] = f"{b[b.method == 'first_beat'].value.mean():.2f}"
+    raw = load("downbeat_gtzan.csv")
+    au = raw[(raw.method == "low_onset_finder_auto")]
+    if len(au):
+        macros["DBAuto"] = f"{num(au[au.condition == 'annotated_beats'], 'F').value.mean():.2f}"
+        macros["DBAutoNN"] = f"{num(au[au.condition == 'nn_beats'], 'F').value.mean():.2f}"
+        macros["DBAutoLen"] = f"{100*num(au[au.condition == 'annotated_beats'], 'bar_length_correct').value.mean():.0f}"
+        macros["DBAutoLenNN"] = f"{100*num(au[au.condition == 'nn_beats'], 'bar_length_correct').value.mean():.0f}"
+    macros["DBZeroShare"] = f"{100*(s.value == 0).mean():.0f}"
     if m is not None:
         macros["DBMadJoint"] = f"{m[m.method == 'madmom_joint'].value.mean():.2f}"
         macros["DBMadBar"] = f"{m[m.method == 'madmom_bar'].value.mean():.2f}"

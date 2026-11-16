@@ -10,3 +10,4 @@ report/*.aux
 report/*.log
 report/*.out
 report/
+results_full/
