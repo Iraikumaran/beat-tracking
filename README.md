@@ -2,7 +2,7 @@
 
 CSC 475/575, University of Victoria, Fall 2026
 
-Irai Kumaran Sivanesan, Nalluraj Babu, Usha Sundaresan Manivannan
+Irai Kumaran Sivanesan, Nalluraj Babu, Manivannan Usha Sundaresan
 
 Repository: https://github.com/Iraikumaran/beat-tracking
 
@@ -14,7 +14,7 @@ Each of us will build one method from scratch: an autocorrelation tempo estimato
 
 ## Progress (Nov 16, 2026)
 
-The progress reports are in `report/` (`irai.pdf`, `nalluraj.pdf`, `usha.pdf`). All results are on the artist-filtered GTZAN test split (290 clips). Every experiment was run twice and gave the same numbers.
+All results are on the artist-filtered GTZAN test split (290 clips). Every experiment was run twice and gave the same numbers.
 
 | Method | Result |
 |---|---|
@@ -33,8 +33,8 @@ PI status (D done, P partly done, - not started):
 | Irai | 2 | D | D | D | D | D |
 | Nalluraj | 1 | D | D | D | D | - |
 | Nalluraj | 2 | D | D | P | D | - |
-| Usha | 1 | D | P | D | P | - |
-| Usha | 2 | D | D | D | D | - |
+| Mani | 1 | D | P | D | P | - |
+| Mani | 2 | D | D | D | D | - |
 
 Still to do: GiantSteps, the 1D State Space tracker, the TCN in PyTorch, and the remaining advanced goals.
 
@@ -45,10 +45,9 @@ Still to do: GiantSteps, the 1D State Space tracker, the TCN in PyTorch, and the
 | `src/common/` | data loading, onset envelope, mir_eval scoring (shared) |
 | `src/tempo/`, `src/tempo_change/` | Irai: tempo estimator, tempo change study |
 | `src/dp_tracker/`, `src/degradation/` | Nalluraj: DP beat tracker, degraded audio study |
-| `src/tcn/`, `src/downbeat/` | Usha: neural network beat tracker, downbeat finder |
+| `src/tcn/`, `src/downbeat/` | Mani: neural network beat tracker, downbeat finder |
 | `results/` | result CSVs (track, dataset, genre, method, condition, metric, value) |
 | `scripts/make_figures.py` | makes every figure and table in `figures/` from `results/` |
-| `report/` | LaTeX source and PDFs of the progress reports |
 
 ## How to run
 
@@ -77,7 +76,7 @@ python -m src.downbeat.run_madmom_downbeat
 python scripts/make_figures.py
 ```
 
-`run_nn` must run before `run_madmom` and `run_downbeat`. Set `RESULTS_DIR=results_test` to write somewhere other than `results/`. To rebuild a report: `cd report && pdflatex irai.tex` (twice).
+`run_nn` must run before `run_madmom` and `run_downbeat`. Set `RESULTS_DIR=results_test` to write somewhere other than `results/`.
 
 ## Datasets
 
@@ -110,7 +109,7 @@ Weeks 1 to 4 are done. The revised plan for weeks 5 and 6 is in the progress rep
 
 Gouyon et al. [8] compared many early tempo estimation methods and showed that the most common mistake is picking half or double the correct tempo. Percival and Tzanetakis [10] proposed a simple and accurate tempo estimator based on autocorrelation and pulse trains, which Irai's work follows. Ellis [11] described beat tracking with dynamic programming, which is the basis of Nalluraj's tracker and of librosa's beat tracker.
 
-Neural networks are now the most accurate approach. Böck and Schedl [12] used recurrent networks to find beats, and Böck et al. [13] extended this to downbeats. Davies and Böck [14] showed that temporal convolutional networks (TCNs) work well and are small, which is the model Usha will build. Heydari et al. [7] made beat tracking much faster with a simpler state space. Davies et al. [15] give a practical tutorial that covers all of these methods.
+Neural networks are now the most accurate approach. Böck and Schedl [12] used recurrent networks to find beats, and Böck et al. [13] extended this to downbeats. Davies and Böck [14] showed that temporal convolutional networks (TCNs) work well and are small, which is the model Mani will build. Heydari et al. [7] made beat tracking much faster with a simpler state space. Davies et al. [15] give a practical tutorial that covers all of these methods.
 
 For songs with changing tempo, Grosche and Müller [16] estimate the tempo locally in short windows instead of once per song. For noisy audio, Mauch and Ewert [17] showed that many music analysis tools, including beat trackers, get worse when audio is degraded. GTZAN was introduced by Tzanetakis and Cook [18], and Sturm [3] documents its faults.
 
@@ -156,7 +155,7 @@ Role: beat tracking with dynamic programming
    * PI4 (expected): try a percussive-only onset envelope to make the tracker more robust
    * PI5 (advanced): choose the tracker's tightness setting automatically based on the audio
 
-## Usha Sundaresan Manivannan
+## Manivannan Usha Sundaresan (Mani)
 
 Role: neural network beat tracking and downbeats
 
